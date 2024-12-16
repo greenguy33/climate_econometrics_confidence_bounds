@@ -26,7 +26,7 @@ ghg_model = pd.read_pickle("models/eskander_and_fankhauser_ghg_model_full_covar_
 bayes_ghg_coef1 = ghg_model["slaws_mit_l3_lag"].data.flatten() * np.std(data["lnghg"]) / np.std(data["slaws_mit_l3_lag"])
 bayes_ghg_coef2 = ghg_model["slaws_mit_lt_lag"].data.flatten() * np.std(data["lnghg"]) / np.std(data["slaws_mit_lt_lag"])
 
-# plot figure 6
+# plot figure 5
 
 ghg_no_laws_data, co2_no_laws_data = [], []
 
@@ -95,7 +95,7 @@ axis.set_ylabel("Emissions (GtCO2)", weight="bold")
 axis.xaxis.label.set_size(20)
 axis.yaxis.label.set_size(20)
 
-plt.savefig("figures/fig6.png")
+plt.savefig("figures/fig5.png")
 
 print("Mean of 2016 CO2 reduction: ", np.mean(co2_no_laws_data) - co2_year_mean[2016])
 print("Lower bound of 2016 CO2 reduction:", np.quantile(co2_no_laws_data, .05) - co2_year_mean[2016])
@@ -121,7 +121,7 @@ print("Mean of total other GHG reduction:", np.mean(total_red_sum))
 print("Lower bound of total other GHG reduction:", np.quantile(total_red_sum,.05))
 print("Upper bound of total other GHG reduction:", np.quantile(total_red_sum,.95))
 
-# plot figure 7
+# plot figure 6
 
 temp_red_samples = []
 ipcc_dist = np.random.normal(1.65, .65/1.645, 1000)
@@ -138,4 +138,4 @@ axis.hist(temp_red_samples, bins=100, color="red")
 sns.kdeplot(temp_red_samples, ax=axis, color="black")
 axis.set_xlabel("Temperature Reduction (◦C)", size=15)
 axis.set_ylabel("Probability Density", size=15)
-plt.savefig("figures/fig7.png", bbox_inches="tight")
+plt.savefig("figures/fig6.png", bbox_inches="tight")

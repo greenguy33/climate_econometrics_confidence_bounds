@@ -6,6 +6,7 @@ import matplotlib.colors as mcolors
 from statsmodels.tsa.statespace.tools import diff
 from statsmodels.tsa.tsatools import add_lag
 import math
+import country_converter as cc
 
 # load Bayesian model
 
@@ -129,7 +130,7 @@ if make_fig4:
 	plt.savefig('figures/fig4.png',bbox_inches='tight',pad_inches=0)
 	plt.close()
 
-# make figure 5
+# make supplementary table 5
 
 pop_by_region = pd.read_csv("data/pop_by_region.csv")
 
@@ -152,29 +153,40 @@ for country in set(data.iso):
         country_averages[country].append((np.array(region_vals) / 100) * math.exp(last_year_region_gdp) * regional_weights[region])
     country_averages[country] = np.sum(country_averages[country], axis=0)
 
-sorted_country_averages = {key:val for key,val in sorted(country_averages.items(), key=lambda x : np.std(x[1]))}
+sorted_country_averages = {key:val for key,val in sorted(country_averages.items(), key=lambda x : np.mean(x[1]))}
 
-indices = [0,1,2,3,4,5,6,7,8,9,10]
-fig,axis = plt.subplots(1,1)
-countries_to_include = ["IDN","CHN","GRC","USA"]
-bars = []
-for country in countries_to_include:
-    bars.append(np.quantile(country_averages[country], .95))
-    bars.append(np.quantile(country_averages[country], .05))
-    bars.append(0)
-    print(country)
-    print(np.quantile(country_averages[country], .95))
-    print(np.quantile(country_averages[country], .05))
-bars = bars[:-1]
-axis.bar(
-    indices,
-    [-1*val for val in bars],
-    color=["red","blue","white"],
-    linewidth=0,
-    width=1
-)
-axis.set_xticks(indices,["IDN\n(low)","IDN\n(high)","","CHN\n(low)","CHN\n(high)", "", "GRC\n(low)","GRC\n(high)","","USA\n(low)","USA\n(high)"])
-axis.set_xlabel("Country", size=15)
-axis.set_ylabel("Per capita loss (USD)", size=15)
+suptab5 = pd.DataFrame()
+suptab5["Country Name"] = cc.convert(sorted_country_averages.keys(), to="name_short")
+suptab5["ISO3 Country Code"] = list(sorted_country_averages.keys())
+suptab5["Lower Bound Estimate (5th percentile)"] = [np.quantile(sorted_country_averages[country], .05) for country in sorted_country_averages]
+suptab5["Point Estimate"] = [np.mean(sorted_country_averages[country]) for country in sorted_country_averages]
+suptab5["Higher Bound Estimate (95th percentile)"] = [np.quantile(sorted_country_averages[country], .95) for country in sorted_country_averages]
+suptab5.to_latex(buf="tables/suptab5.ltx", index=False, float_format="%.0f", longtable=True)
 
-plt.savefig("figures/fig5.png", bbox_inches="tight")
+
+# make old figure 5
+
+# indices = [0,1,2,3,4,5,6,7,8,9,10]
+# fig,axis = plt.subplots(1,1)
+# countries_to_include = ["IDN","CHN","GRC","USA"]
+# bars = []
+# for country in countries_to_include:
+#     bars.append(np.quantile(country_averages[country], .95))
+#     bars.append(np.quantile(country_averages[country], .05))
+#     bars.append(0)
+#     print(country)
+#     print(np.quantile(country_averages[country], .95))
+#     print(np.quantile(country_averages[country], .05))
+# bars = bars[:-1]
+# axis.bar(
+#     indices,
+#     [-1*val for val in bars],
+#     color=["red","blue","white"],
+#     linewidth=0,
+#     width=1
+# )
+# axis.set_xticks(indices,["IDN\n(low)","IDN\n(high)","","CHN\n(low)","CHN\n(high)", "", "GRC\n(low)","GRC\n(high)","","USA\n(low)","USA\n(high)"])
+# axis.set_xlabel("Country", size=15)
+# axis.set_ylabel("Per capita loss (USD)", size=15)
+
+# plt.savefig("figures/fig5.png", bbox_inches="tight")
